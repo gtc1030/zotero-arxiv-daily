@@ -60,18 +60,13 @@ def get_arxiv_paper(query:str, debug:bool=False) -> list[ArxivPaper]:
     assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
     keyword = "\"" + keyword + "\""
     url = "http://export.arxiv.org/api/query?search_query=cat:{3}+{2}+ti:{0}+{2}+abs:{0}&max_results={1}&sortBy=lastUpdatedDate".format(keyword, max_results, link, query)
-    print("Here is the first url!")
-    print(url)
+    logger.info(f"Here is the first url!:\n {url}...")
     url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-    print("Here is the second url!")
-    print(url)
+    logger.info(f"Here is the second url!:\n {url}...")
     response = urllib.request.urlopen(url).read().decode('utf-8')
-    print("Here is the first response!")
-    print(response)
+    logger.info(f"Here is the first response!:\n {response}...")
     feed = feedparser.parse(response)
 
-    print(url)
-    
     if 'Feed error for query' in feed.feed.title:
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
 
