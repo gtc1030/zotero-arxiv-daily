@@ -218,7 +218,7 @@ if __name__ == '__main__':
         logger.remove()
         logger.add(sys.stdout, level="INFO")
 
-    logger.info("Retrieving Zotero corpus...")
+    logger.info("Retrieving Zotero corpuslllllllllllllllll...")
     corpus = get_zotero_corpus(args.zotero_id, args.zotero_key)
     logger.info(f"Retrieved {len(corpus)} papers from Zotero.")
     logger.info(f"llllllllllllllllllllllllllllllllllllllllllllllllllllll")
