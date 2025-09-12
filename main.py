@@ -15,6 +15,7 @@ from tempfile import mkstemp
 from paper import ArxivPaper
 from llm import set_global_llm
 import feedparser
+import urllib, urllib.request
 
 def get_zotero_corpus(id:str,key:str) -> list[dict]:
     zot = zotero.Zotero(id, 'user', key)
@@ -47,10 +48,25 @@ def filter_corpus(corpus:list[dict], pattern:str) -> list[dict]:
 
 
 def get_arxiv_paper(query:str, debug:bool=False) -> list[ArxivPaper]:
+
+    keyword = "Computational Fluid Dynamics" 
+    max_results = 5
+    link = "OR"
+    
     client = arxiv.Client(num_retries=10,delay_seconds=10)
-    feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
+    # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
+
+    # keyword = keyword.replace(" ", "+")
+    assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
+    keyword = "\"" + keyword + "\""
+    url = "http://export.arxiv.org/api/query?search_query=cat:{3}+{2}+ti:{0}+{2}+abs:{0}&max_results={1}&sortBy=lastUpdatedDate".format(keyword, max_results, link, query)
+    url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    response = urllib.request.urlopen(url).read().decode('utf-8')
+    feed = feedparser.parse(response)
+    
     if 'Feed error for query' in feed.feed.title:
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
+
     if not debug:
         papers = []
         all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
@@ -72,6 +88,51 @@ def get_arxiv_paper(query:str, debug:bool=False) -> list[ArxivPaper]:
                 break
 
     return papers
+
+def request_paper_with_arXiv_api(keyword: str, max_results: int, link: str = "OR") -> List[Dict[str, str]]:
+    # keyword = keyword.replace(" ", "+")
+    assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
+    keyword = "\"" + keyword + "\""
+    url = "http://export.arxiv.org/api/query?search_query=ti:{0}+{2}+abs:{0}&max_results={1}&sortBy=lastUpdatedDate".format(keyword, max_results, link)
+    url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    response = urllib.request.urlopen(url).read().decode('utf-8')
+    feed = feedparser.parse(response)
+
+    # NOTE default columns: Title, Authors, Abstract, Link, Tags, Comment, Date
+    papers = []
+    for entry in feed.entries:
+        entry = EasyDict(entry)
+        paper = EasyDict()
+
+        # title
+        paper.Title = remove_duplicated_spaces(entry.title.replace("\n", " "))
+        # abstract
+        paper.Abstract = remove_duplicated_spaces(entry.summary.replace("\n", " "))
+        # authors
+        paper.Authors = [remove_duplicated_spaces(_["name"].replace("\n", " ")) for _ in entry.authors]
+        # link
+        paper.Link = remove_duplicated_spaces(entry.link.replace("\n", " "))
+        # tags
+        paper.Tags = [remove_duplicated_spaces(_["term"].replace("\n", " ")) for _ in entry.tags]
+        # comment
+        paper.Comment = remove_duplicated_spaces(entry.get("arxiv_comment", "").replace("\n", " "))
+        # date
+        paper.Date = entry.updated
+
+        papers.append(paper)
+    return papers
+
+def filter_tags(papers: List[Dict[str, str]], target_fileds: List[str]=["cs", "stat"]) -> List[Dict[str, str]]:
+    # filtering tags: only keep the papers in target_fileds
+    results = []
+    for paper in papers:
+        tags = paper.Tags
+        for tag in tags:
+            if tag.split(".")[0] in target_fileds:
+                results.append(paper)
+                break
+    return results
+
 
 
 
