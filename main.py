@@ -54,7 +54,7 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     # keyword = keyword.replace(" ", "+")
     assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
     keyword = "\"" + keyword + "\""
-    url = "http://export.arxiv.org/api/query?search_query=cat:{2}+{1}+ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
+    url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
     url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
     response = urllib.request.urlopen(url).read().decode('utf-8')
     feed = feedparser.parse(response)
