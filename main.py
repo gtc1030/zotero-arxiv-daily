@@ -47,24 +47,18 @@ def filter_corpus(corpus:list[dict], pattern:str) -> list[dict]:
     return new_corpus
 
 
-def get_arxiv_paper(query:str, debug:bool=False) -> list[ArxivPaper]:
+def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[ArxivPaper]:
 
-    keyword = "Computational Fluid Dynamics" 
-    max_results = 5
-    link = "OR"
-    
+    # keyword = "Computational Fluid Dynamics" 
+    # link = "OR"
     client = arxiv.Client(num_retries=10,delay_seconds=10)
     # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
-
     # keyword = keyword.replace(" ", "+")
     assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
     keyword = "\"" + keyword + "\""
-    url = "http://export.arxiv.org/api/query?search_query=cat:{3}+{2}+ti:{0}+{2}+abs:{0}&max_results={1}&sortBy=lastUpdatedDate".format(keyword, max_results, link, query)
-    logger.info(f"Here is the first url!:\n {url}...")
+    url = "http://export.arxiv.org/api/query?search_query=cat:{2}+{1}+ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
     url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-    logger.info(f"Here is the second url!:\n {url}...")
     response = urllib.request.urlopen(url).read().decode('utf-8')
-    logger.info(f"Here is the first response!:\n {response}...")
     feed = feedparser.parse(response)
 
     if 'Feed error for query' in feed.feed.title:
@@ -124,6 +118,8 @@ if __name__ == '__main__':
     add_argument('--send_empty', type=bool, help='If get no arxiv paper, send empty email',default=False)
     add_argument('--max_paper_num', type=int, help='Maximum number of papers to recommend',default=100)
     add_argument('--arxiv_query', type=str, help='Arxiv search query')
+    add_argument('--keyword', type=str, help='Arxiv search query by keyword')
+    add_argument('--link', type=str, help='OR or AND')
     add_argument('--smtp_server', type=str, help='SMTP server')
     add_argument('--smtp_port', type=int, help='SMTP port')
     add_argument('--sender', type=str, help='Sender email address')
@@ -172,16 +168,15 @@ if __name__ == '__main__':
         logger.remove()
         logger.add(sys.stdout, level="INFO")
 
-    logger.info("Retrieving Zotero corpuslllllllllllllllll...")
+    logger.info("Retrieving Zotero corpus...")
     corpus = get_zotero_corpus(args.zotero_id, args.zotero_key)
     logger.info(f"Retrieved {len(corpus)} papers from Zotero.")
-    logger.info(f"llllllllllllllllllllllllllllllllllllllllllllllllllllll")
     if args.zotero_ignore:
         logger.info(f"Ignoring papers in:\n {args.zotero_ignore}...")
         corpus = filter_corpus(corpus, args.zotero_ignore)
         logger.info(f"Remaining {len(corpus)} papers after filtering.")
     logger.info("Retrieving Arxiv papers...")
-    papers = get_arxiv_paper(args.arxiv_query, args.debug)
+    papers = get_arxiv_paper(args.arxiv_query, args.keyword, args.link, args.debug)
     if len(papers) == 0:
         logger.info("No new papers found. Yesterday maybe a holiday and no one submit their work :). If this is not the case, please check the ARXIV_QUERY.")
         if not args.send_empty:
