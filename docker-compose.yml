@@ -27,6 +27,8 @@ services:
       - OPENAI_API_BASE=https://api.openai.com/v1
       - MODEL_NAME=Qwen/Qwen1.5-7B-Instruct
       - LANGUAGE=English
+      - KEYWORD=Computational Fluid Dynamics
+      - LINK=OR
       
       # 新增配置
       - HF_ENDPOINT=https://hf-mirror.com
