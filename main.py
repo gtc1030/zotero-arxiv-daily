@@ -49,7 +49,7 @@ def filter_corpus(corpus:list[dict], pattern:str) -> list[dict]:
 
 def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[ArxivPaper]:
 
-    # keyword = "Computational Fluid Dynamics" 
+    keyword = "Computational Fluid Dynamics" 
     # link = "OR"
     client = arxiv.Client(num_retries=10,delay_seconds=10)
     # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
@@ -58,6 +58,7 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     keyword = "\"" + keyword + "\""
     url = "http://export.arxiv.org/api/query?search_query=cat:{2}+{1}+ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
     url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    logger.info(f"Here is the query: {query}")
     logger.info(f"Here is the url: {url}")
     response = urllib.request.urlopen(url).read().decode('utf-8')
     feed = feedparser.parse(response)
