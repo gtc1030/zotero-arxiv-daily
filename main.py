@@ -62,7 +62,7 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     if 'Feed error for query' in feed.feed.title:
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
 
-    print(feed)
+    logger.info(f"Print {feed}.")
 
     if not debug:
         papers = []
