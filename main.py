@@ -93,6 +93,15 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
     if 'Feed error for query' in feed.feed.title:
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
+
+    logger.info(f"Print {feed}.")
+    logger.info(f"Print {feed.entries}.")
+    all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
+    logger.info(f"Print {all_paper_ids}.")
+
+
+
+    
     if not debug:
         papers = []
         all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
