@@ -104,7 +104,7 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
         search = arxiv.Search(id_list=all_paper_ids[i:i+50])
         logger.info(f"Print {client.results(search)}.")
         # batch = [ArxivPaper(p) for p in client.results(search)]
-        bar.update(len(batch))
+        # bar.update(len(batch))
         papers.extend(batch)
     bar.close()
 
