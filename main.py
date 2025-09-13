@@ -16,6 +16,7 @@ from paper import ArxivPaper
 from llm import set_global_llm
 import feedparser
 import urllib, urllib.request
+from easydict import EasyDict
 
 def remove_duplicated_spaces(text: str) -> str:
     return " ".join(text.split())
@@ -60,7 +61,7 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     keyword = "\"" + keyword + "\""
     url = "http://export.arxiv.org/api/query?search_query=cat:{2}+{1}+ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
     # url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}".format(keyword, link, query)
-    url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    # url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
     response = urllib.request.urlopen(url).read().decode('utf-8')
     # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
     feed = feedparser.parse(response)
