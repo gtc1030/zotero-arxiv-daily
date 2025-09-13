@@ -17,6 +17,10 @@ from llm import set_global_llm
 import feedparser
 import urllib, urllib.request
 
+def remove_duplicated_spaces(text: str) -> str:
+    return " ".join(text.split())
+
+
 def get_zotero_corpus(id:str,key:str) -> list[dict]:
     zot = zotero.Zotero(id, 'user', key)
     collections = zot.everything(zot.collections())
