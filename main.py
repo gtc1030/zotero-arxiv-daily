@@ -142,11 +142,11 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     # papers = []
     # logger.info(f"Print {feed}.")
     # logger.info(f"Print {feed.entries}.")
-    # all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries]
+    all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries]
     # logger.info(f"Print {all_paper_ids}.")
     # bar = tqdm(total=len(all_paper_ids),desc="Retrieving Arxiv papers")
     
-    for i in range(0,len(results),50):
+    for i in range(0,len(all_paper_ids),50):
         search = arxiv.Search(id_list=i[i:i+50])
         logger.info(f"Print {client.results(search)}.")
         batch = [ArxivPaper(p) for p in client.results(search)]
