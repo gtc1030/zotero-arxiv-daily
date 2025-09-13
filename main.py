@@ -64,6 +64,9 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
 
     logger.info(f"Print {feed}.")
+    all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
+    logger.info(f"Print {all_paper_ids}.")
+
 
     if not debug:
         papers = []
