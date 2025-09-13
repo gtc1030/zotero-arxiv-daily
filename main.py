@@ -50,14 +50,14 @@ def filter_corpus(corpus:list[dict], pattern:str) -> list[dict]:
 def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[ArxivPaper]:
 
     client = arxiv.Client(num_retries=10,delay_seconds=10)
-    # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
+    feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
     # keyword = keyword.replace(" ", "+")
-    assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
-    keyword = "\"" + keyword + "\""
-    url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
-    url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-    response = urllib.request.urlopen(url).read().decode('utf-8')
-    feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
+    # assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
+    # keyword = "\"" + keyword + "\""
+    # url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
+    # url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    # response = urllib.request.urlopen(url).read().decode('utf-8')
+    # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
     # feed = feedparser.parse(response)
 
     if 'Feed error for query' in feed.feed.title:
