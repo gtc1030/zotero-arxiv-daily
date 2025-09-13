@@ -49,26 +49,50 @@ def filter_corpus(corpus:list[dict], pattern:str) -> list[dict]:
 
 def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[ArxivPaper]:
 
+    # client = arxiv.Client(num_retries=10,delay_seconds=10)
+    # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
+    # # keyword = keyword.replace(" ", "+")
+    # # assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
+    # # keyword = "\"" + keyword + "\""
+    # # url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
+    # # url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    # # response = urllib.request.urlopen(url).read().decode('utf-8')
+    # # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
+    # # feed = feedparser.parse(response)
+
+    # if 'Feed error for query' in feed.feed.title:
+    #     raise Exception(f"Invalid ARXIV_QUERY: {query}.")
+
+    # logger.info(f"Print {feed}.")
+    # logger.info(f"Print {feed.entries}.")
+    # all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
+    # logger.info(f"Print {all_paper_ids}.")
+
+
+    # if not debug:
+    #     papers = []
+    #     all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
+    #     bar = tqdm(total=len(all_paper_ids),desc="Retrieving Arxiv papers")
+    #     for i in range(0,len(all_paper_ids),50):
+    #         search = arxiv.Search(id_list=all_paper_ids[i:i+50])
+    #         batch = [ArxivPaper(p) for p in client.results(search)]
+    #         bar.update(len(batch))
+    #         papers.extend(batch)
+    #     bar.close()
+
+    # else:
+    #     logger.debug("Retrieve 5 arxiv papers regardless of the date.")
+    #     search = arxiv.Search(query='cat:cs.AI', sort_by=arxiv.SortCriterion.SubmittedDate)
+    #     papers = []
+    #     for i in client.results(search):
+    #         papers.append(ArxivPaper(i))
+    #         if len(papers) == 5:
+    #             break
+
     client = arxiv.Client(num_retries=10,delay_seconds=10)
     feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
-    # keyword = keyword.replace(" ", "+")
-    # assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
-    # keyword = "\"" + keyword + "\""
-    # url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
-    # url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-    # response = urllib.request.urlopen(url).read().decode('utf-8')
-    # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
-    # feed = feedparser.parse(response)
-
     if 'Feed error for query' in feed.feed.title:
         raise Exception(f"Invalid ARXIV_QUERY: {query}.")
-
-    logger.info(f"Print {feed}.")
-    logger.info(f"Print {feed.entries}.")
-    all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
-    logger.info(f"Print {all_paper_ids}.")
-
-
     if not debug:
         papers = []
         all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
