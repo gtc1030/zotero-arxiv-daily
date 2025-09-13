@@ -94,34 +94,41 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{query}")
     # if 'Feed error for query' in feed.feed.title:
     #     raise Exception(f"Invalid ARXIV_QUERY: {query}.")
-
+    papers = []
     logger.info(f"Print {feed}.")
     logger.info(f"Print {feed.entries}.")
     all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries]
     logger.info(f"Print {all_paper_ids}.")
+    bar = tqdm(total=len(all_paper_ids),desc="Retrieving Arxiv papers")
+    for i in range(0,len(all_paper_ids),50):
+        search = arxiv.Search(id_list=all_paper_ids[i:i+50])
+        batch = [ArxivPaper(p) for p in client.results(search)]
+        bar.update(len(batch))
+        papers.extend(batch)
+    bar.close()
 
 
 
     
-    if not debug:
-        papers = []
-        all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
-        bar = tqdm(total=len(all_paper_ids),desc="Retrieving Arxiv papers")
-        for i in range(0,len(all_paper_ids),50):
-            search = arxiv.Search(id_list=all_paper_ids[i:i+50])
-            batch = [ArxivPaper(p) for p in client.results(search)]
-            bar.update(len(batch))
-            papers.extend(batch)
-        bar.close()
+    # if not debug:
+    #     papers = []
+    #     all_paper_ids = [i.id.removeprefix("oai:arXiv.org:") for i in feed.entries if i.arxiv_announce_type == 'new']
+    #     bar = tqdm(total=len(all_paper_ids),desc="Retrieving Arxiv papers")
+    #     for i in range(0,len(all_paper_ids),50):
+    #         search = arxiv.Search(id_list=all_paper_ids[i:i+50])
+    #         batch = [ArxivPaper(p) for p in client.results(search)]
+    #         bar.update(len(batch))
+    #         papers.extend(batch)
+    #     bar.close()
 
-    else:
-        logger.debug("Retrieve 5 arxiv papers regardless of the date.")
-        search = arxiv.Search(query='cat:cs.AI', sort_by=arxiv.SortCriterion.SubmittedDate)
-        papers = []
-        for i in client.results(search):
-            papers.append(ArxivPaper(i))
-            if len(papers) == 5:
-                break
+    # else:
+    #     logger.debug("Retrieve 5 arxiv papers regardless of the date.")
+    #     search = arxiv.Search(query='cat:cs.AI', sort_by=arxiv.SortCriterion.SubmittedDate)
+    #     papers = []
+    #     for i in client.results(search):
+    #         papers.append(ArxivPaper(i))
+    #         if len(papers) == 5:
+    #             break
 
     return papers
 
