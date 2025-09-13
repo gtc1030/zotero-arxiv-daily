@@ -16,10 +16,10 @@ from paper import ArxivPaper
 from llm import set_global_llm
 import feedparser
 import urllib, urllib.request
-from easydict import EasyDict
+# from easydict import EasyDict
 
-def remove_duplicated_spaces(text: str) -> str:
-    return " ".join(text.split())
+# def remove_duplicated_spaces(text: str) -> str:
+#     return " ".join(text.split())
 
 
 def get_zotero_corpus(id:str,key:str) -> list[dict]:
@@ -59,9 +59,9 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
     # keyword = keyword.replace(" ", "+")
     assert link in ["OR", "AND"], "link should be 'OR' or 'AND'"
     keyword = "\"" + keyword + "\""
-    url = "http://export.arxiv.org/api/query?search_query=cat:{2}+{1}+ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
+    url = "http://export.arxiv.org/api/query?search_query=ti:{0}+{1}+abs:{0}&sortBy=lastUpdatedDate".format(keyword, link, query)
     # url = "http://export.arxiv.org/api/query?search_query=cat:{2}&ti:{0}+{1}+abs:{0}".format(keyword, link, query)
-    # url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+    url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
     response = urllib.request.urlopen(url).read().decode('utf-8')
     # feed = feedparser.parse(f"https://rss.arxiv.org/atom/{response}")
     feed = feedparser.parse(response)
@@ -72,42 +72,42 @@ def get_arxiv_paper(query:str, keyword:str, link:str, debug:bool=False) -> list[
 
     logger.info(f"Print feeds {feed.entries}.")
     
-    # NOTE default columns: Title, Authors, Abstract, Link, Tags, Comment, Date
-    papers = []
-    for entry in feed.entries:
-        entry = EasyDict(entry)
-        paper = EasyDict()
+    # # NOTE default columns: Title, Authors, Abstract, Link, Tags, Comment, Date
+    # papers = []
+    # for entry in feed.entries:
+    #     entry = EasyDict(entry)
+    #     paper = EasyDict()
 
-        # title
-        paper.Title = remove_duplicated_spaces(entry.title.replace("\n", " "))
-        # abstract
-        paper.Abstract = remove_duplicated_spaces(entry.summary.replace("\n", " "))
-        # authors
-        paper.Authors = [remove_duplicated_spaces(_["name"].replace("\n", " ")) for _ in entry.authors]
-        # link
-        paper.Link = remove_duplicated_spaces(entry.link.replace("\n", " "))
-        # tags
-        paper.Tags = [remove_duplicated_spaces(_["term"].replace("\n", " ")) for _ in entry.tags]
-        # comment
-        paper.Comment = remove_duplicated_spaces(entry.get("arxiv_comment", "").replace("\n", " "))
-        # date
-        paper.Date = entry.updated
-        # title
-        paper.ID = entry.id
+    #     # title
+    #     paper.Title = remove_duplicated_spaces(entry.title.replace("\n", " "))
+    #     # abstract
+    #     paper.Abstract = remove_duplicated_spaces(entry.summary.replace("\n", " "))
+    #     # authors
+    #     paper.Authors = [remove_duplicated_spaces(_["name"].replace("\n", " ")) for _ in entry.authors]
+    #     # link
+    #     paper.Link = remove_duplicated_spaces(entry.link.replace("\n", " "))
+    #     # tags
+    #     paper.Tags = [remove_duplicated_spaces(_["term"].replace("\n", " ")) for _ in entry.tags]
+    #     # comment
+    #     paper.Comment = remove_duplicated_spaces(entry.get("arxiv_comment", "").replace("\n", " "))
+    #     # date
+    #     paper.Date = entry.updated
+    #     # title
+    #     paper.ID = entry.id
 
-        papers.append(paper)
+    #     papers.append(paper)
 
-    logger.info(f"Print papers {papers}.")
+    # logger.info(f"Print papers {papers}.")
 
-    # filtering tags: only keep the papers in target_fileds
-    results = []
-    for paper in papers:
-        tags = paper.Tags
-        for tag in tags:
-            if tag.split(".")[0] in query:
-                results.append(paper.id)
-                break
-    logger.info(f"Print results {results}.")
+    # # filtering tags: only keep the papers in target_fileds
+    # results = []
+    # for paper in papers:
+    #     tags = paper.Tags
+    #     for tag in tags:
+    #         if tag.split(".")[0] in query:
+    #             results.append(paper.id)
+    #             break
+    # logger.info(f"Print results {results}.")
 
     # logger.info(f"Print {feed}.")
     # logger.info(f"Print {feed.entries}.")
